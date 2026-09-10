@@ -1,0 +1,23 @@
+{
+  "name": "strapi-hreflang-automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "inspect": "tsx src/cli.ts inspect",
+    "dry-run": "tsx src/cli.ts run",
+    "apply": "tsx src/cli.ts run --apply",
+    "build": "tsc -p tsconfig.json",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "p-limit": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
+
