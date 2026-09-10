@@ -27,8 +27,8 @@ Comprueba en la salida la ruta real de `slug`, SEO y `MultipleHrefLangs`. Si dif
 
 ```env
 STRAPI_SLUG_PATH=slug
-STRAPI_HREFLANGS_PATH=SEO.MultipleHrefLangs
-STRAPI_POPULATE_QUERY=populate[SEO][populate][MultipleHrefLangs]=*
+STRAPI_HREFLANGS_PATH=seo.MultipleHrefLangs
+STRAPI_POPULATE_QUERY=populate[seo][populate]=*
 ```
 
 Después ejecuta una simulación completa:

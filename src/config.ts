@@ -20,12 +20,11 @@ export function loadConfig() {
     locale: process.env.STRAPI_LOCALE ?? "es-MX",
     pageSize: positiveInteger("STRAPI_PAGE_SIZE", 100),
     slugPath: process.env.STRAPI_SLUG_PATH ?? "slug",
-    hrefLangsPath: process.env.STRAPI_HREFLANGS_PATH ?? "SEO.MultipleHrefLangs",
-    populateQuery: process.env.STRAPI_POPULATE_QUERY ?? "populate[SEO][populate][MultipleHrefLangs]=*",
+    hrefLangsPath: process.env.STRAPI_HREFLANGS_PATH ?? "seo.MultipleHrefLangs",
+    populateQuery: process.env.STRAPI_POPULATE_QUERY ?? "populate[seo][populate]=*",
     timeoutMs: positiveInteger("HTTP_TIMEOUT_MS", 12000),
     concurrency: positiveInteger("HTTP_CONCURRENCY", 8)
   };
 }
 
 export type AppConfig = ReturnType<typeof loadConfig>;
-

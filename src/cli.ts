@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { loadConfig } from "./config.js";
 import { processProduct } from "./automation.js";
+import { getAtPath } from "./object-path.js";
 import { StrapiClient } from "./strapi-client.js";
 import type { ProductResult } from "./types.js";
 
@@ -13,8 +14,23 @@ async function main(): Promise<void> {
 
   if (command === "inspect") {
     const firstPage = await client.getPage(1);
-    console.dir({ meta: firstPage.meta, firstProduct: firstPage.data[0] }, { depth: 12, colors: true });
-    console.log("\nConfirma en .env las variables STRAPI_SLUG_PATH y STRAPI_HREFLANGS_PATH.");
+    const product = firstPage.data[0];
+    const attributes = product?.attributes && typeof product.attributes === "object"
+      ? product.attributes as Record<string, unknown>
+      : product;
+    const hrefLangs = getAtPath(attributes, config.hrefLangsPath);
+    console.dir({
+      meta: firstPage.meta,
+      product: {
+        id: product?.id,
+        documentId: product?.documentId,
+        slug: getAtPath(attributes, config.slugPath),
+        hrefLangsPath: config.hrefLangsPath,
+        hrefLangCount: Array.isArray(hrefLangs) ? hrefLangs.length : null,
+        hrefLangSample: Array.isArray(hrefLangs) ? hrefLangs.slice(0, 2) : hrefLangs
+      }
+    }, { depth: 8, colors: true });
+    console.log("\nInspección terminada. No se realizaron cambios.");
     return;
   }
 
@@ -50,4 +66,3 @@ main().catch(error => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
 });
-
