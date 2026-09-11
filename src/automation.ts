@@ -45,7 +45,7 @@ export async function processProduct(
     return { identifier, slug, ...reportInfo, existingCount: existing.length, added: [], unavailable: [], action: "skipped-complete" };
   }
 
-  const existingCodes = new Set(existing.map(item => String(item.hreflang ?? "").toLowerCase()));
+  const existingCodes = new Set(existing.map(item => String(item.hrefLang ?? "").toLowerCase()));
   const missing = TARGETS.filter(target => !existingCodes.has(target.hreflang));
   const limit = pLimit(config.concurrency);
   const checks = await Promise.all(missing.map(target => limit(async () => {

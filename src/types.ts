@@ -1,7 +1,7 @@
 export type JsonObject = Record<string, unknown>;
 
 export interface HrefLang extends JsonObject {
-  hreflang: string;
+  hrefLang: string;
   url: string;
   locale: string;
   rel: "alternate";

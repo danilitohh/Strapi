@@ -80,7 +80,7 @@ async function main(): Promise<void> {
       siuKey: result.siuKey ?? "",
       País: config.locale,
       "Cantidad de hreflang agregados": result.added.length,
-      "Países agregados": countryList(result.added.map(item => item.hreflang)),
+      "Países agregados": countryList(result.added.map(item => item.hrefLang)),
       "Países no disponibles": countryList(result.unavailable.map(item => item.hreflang))
     }));
   const workbook = new ExcelJS.Workbook();

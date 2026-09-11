@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildUrl, TARGETS } from "../src/countries.js";
+import { buildUrl, createHrefLang, TARGETS } from "../src/countries.js";
 
 const slug = "licenciatura-en-gestion-de-politicas-y-gobierno";
 
@@ -40,4 +40,13 @@ test("convierte maestría en magíster únicamente para Chile", () => {
 test("incluye 13 países y x-default", () => {
   assert.equal(TARGETS.length, 14);
   assert.equal(new Set(TARGETS.map(target => target.hreflang)).size, 14);
+});
+
+test("genera el nombre de campo hrefLang esperado por Strapi", () => {
+  assert.deepEqual(createHrefLang("es-mx", "https://utel.edu.mx/programa"), {
+    hrefLang: "es-mx",
+    url: "https://utel.edu.mx/programa",
+    locale: "",
+    rel: "alternate"
+  });
 });

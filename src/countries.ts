@@ -34,5 +34,5 @@ export function buildUrl(target: CountryTarget, slug: string): string {
 }
 
 export function createHrefLang(hreflang: string, url: string): HrefLang {
-  return { hreflang, url, locale: "", rel: "alternate" };
+  return { hrefLang: hreflang, url, locale: "", rel: "alternate" };
 }
