@@ -37,9 +37,11 @@ async function main(): Promise<void> {
 
   if (command !== "run") throw new Error(`Comando desconocido: ${command}`);
   console.log(apply ? "MODO APLICAR: se escribirán cambios en Strapi." : "MODO SIMULACIÓN: no se escribirá nada en Strapi.");
+  if (config.maxProducts) console.log(`LÍMITE ACTIVO: se procesarán como máximo ${config.maxProducts} productos.`);
 
   const results: ProductResult[] = [];
   for await (const product of client.allProducts()) {
+    if (config.maxProducts !== null && results.length >= config.maxProducts) break;
     try {
       const result = await processProduct(client, config, product, apply);
       results.push(result);

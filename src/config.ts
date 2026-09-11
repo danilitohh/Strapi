@@ -12,6 +12,14 @@ function positiveInteger(name: string, fallback: number): number {
   return value;
 }
 
+function optionalPositiveInteger(name: string): number | null {
+  const raw = process.env[name]?.trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) throw new Error(`${name} debe ser un entero positivo`);
+  return value;
+}
+
 export function loadConfig() {
   return {
     token: required("STRAPI_API_TOKEN"),
@@ -19,6 +27,7 @@ export function loadConfig() {
     productsPath: process.env.STRAPI_PRODUCTS_PATH ?? "/api/products",
     locale: process.env.STRAPI_LOCALE ?? "es-MX",
     pageSize: positiveInteger("STRAPI_PAGE_SIZE", 100),
+    maxProducts: optionalPositiveInteger("MAX_PRODUCTS"),
     slugPath: process.env.STRAPI_SLUG_PATH ?? "slug",
     hrefLangsPath: process.env.STRAPI_HREFLANGS_PATH ?? "seo.MultipleHrefLangs",
     populateQuery: process.env.STRAPI_POPULATE_QUERY ?? "populate[seo][populate]=*",

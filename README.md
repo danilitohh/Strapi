@@ -39,6 +39,14 @@ npm run dry-run
 
 La simulación recorre automáticamente todas las páginas y guarda el resultado en `reports/`, pero no modifica Strapi. Revisa el reporte antes de aplicar.
 
+Para limitar una prueba a los primeros dos productos, configura en `.env`:
+
+```env
+MAX_PRODUCTS=2
+```
+
+`STRAPI_PAGE_SIZE` solo controla cuántos registros trae cada página y no limita el total. Para volver a procesar todo, deja `MAX_PRODUCTS=` vacío.
+
 Solo cuando la inspección y la simulación sean correctas:
 
 ```powershell
