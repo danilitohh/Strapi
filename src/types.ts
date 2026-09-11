@@ -20,6 +20,7 @@ export interface ProductResult {
   productName?: string;
   siuKey?: string;
   existingCount: number;
+  removedInvalidCount?: number;
   added: HrefLang[];
   unavailable: Array<{ hreflang: string; url: string }>;
   action: "skipped-complete" | "unchanged" | "would-update" | "updated" | "error";

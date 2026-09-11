@@ -6,6 +6,17 @@ import { getAtPath, topLevelBranch } from "./object-path.js";
 import { StrapiClient } from "./strapi-client.js";
 import type { HrefLang, JsonObject, ProductResult } from "./types.js";
 
+export function normalizeExistingHrefLangs(items: HrefLang[]): HrefLang[] {
+  const seen = new Set<string>();
+  return items.filter(item => {
+    if (typeof item.hrefLang !== "string" || !item.hrefLang.trim()) return false;
+    const code = item.hrefLang.trim().toLowerCase();
+    if (seen.has(code)) return false;
+    seen.add(code);
+    return true;
+  });
+}
+
 function attributesOf(product: JsonObject): JsonObject {
   const attributes = product.attributes;
   return attributes && typeof attributes === "object" && !Array.isArray(attributes)
@@ -39,10 +50,12 @@ export async function processProduct(
     siuKey: typeof siuKey === "string" || typeof siuKey === "number" ? String(siuKey) : ""
   };
   const currentValue = getAtPath(attributes, config.hrefLangsPath);
-  const existing = Array.isArray(currentValue) ? currentValue as HrefLang[] : [];
+  const rawExisting = Array.isArray(currentValue) ? currentValue as HrefLang[] : [];
+  const existing = normalizeExistingHrefLangs(rawExisting);
+  const removedInvalidCount = rawExisting.length - existing.length;
 
-  if (existing.length >= MAX_HREFLANGS) {
-    return { identifier, slug, ...reportInfo, existingCount: existing.length, added: [], unavailable: [], action: "skipped-complete" };
+  if (existing.length >= MAX_HREFLANGS && removedInvalidCount === 0) {
+    return { identifier, slug, ...reportInfo, existingCount: existing.length, removedInvalidCount, added: [], unavailable: [], action: "skipped-complete" };
   }
 
   const existingCodes = new Set(existing.map(item => String(item.hrefLang ?? "").toLowerCase()));
@@ -59,8 +72,8 @@ export async function processProduct(
     .map(check => createHrefLang(check.target.hreflang, check.url));
   const unavailable = checks.filter(check => !check.available).map(({ target, url }) => ({ hreflang: target.hreflang, url }));
 
-  if (additions.length === 0) {
-    return { identifier, slug, ...reportInfo, existingCount: existing.length, added: [], unavailable, action: "unchanged" };
+  if (additions.length === 0 && removedInvalidCount === 0) {
+    return { identifier, slug, ...reportInfo, existingCount: existing.length, removedInvalidCount, added: [], unavailable, action: "unchanged" };
   }
 
   if (apply) {
@@ -73,6 +86,7 @@ export async function processProduct(
     slug,
     ...reportInfo,
     existingCount: existing.length,
+    removedInvalidCount,
     added: additions,
     unavailable,
     action: apply ? "updated" : "would-update"
