@@ -1,5 +1,5 @@
 import type { AppConfig } from "./config.js";
-import { strictTopLevelBranch } from "./object-path.js";
+import { safeComponentUpdatePayload } from "./object-path.js";
 import type { JsonObject } from "./types.js";
 
 interface StrapiListResponse {
@@ -82,7 +82,7 @@ export class StrapiClient {
       throw new Error(`Actualización cancelada: Strapi no devolvió el producto ${identifier}`);
     }
 
-    const data = strictTopLevelBranch(attributesOf(response.data), hrefLangsPath, hrefLangs);
+    const data = safeComponentUpdatePayload(attributesOf(response.data), hrefLangsPath, hrefLangs);
     const url = this.itemUrl(identifier, locale, false);
     await this.request(url, { method: "PUT", body: JSON.stringify({ data }) });
   }

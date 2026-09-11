@@ -59,3 +59,53 @@ export function strictTopLevelBranch(source: JsonObject, path: string, value: un
   return payload;
 }
 
+function isJsonObject(value: unknown): value is JsonObject {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function mediaIdentifier(value: unknown, fieldPath: string): string | number | null {
+  if (value === null) return null;
+  if (!isJsonObject(value)) {
+    if (typeof value === "string" || typeof value === "number") return value;
+    throw new Error(`Actualización cancelada: ${fieldPath} no tiene un formato de imagen válido`);
+  }
+
+  const relationData = Object.prototype.hasOwnProperty.call(value, "data") ? value.data : value;
+  if (relationData === null) return null;
+  if (!isJsonObject(relationData)) {
+    throw new Error(`Actualización cancelada: ${fieldPath} no contiene una imagen individual válida`);
+  }
+
+  const identifier = relationData.documentId ?? relationData.id;
+  if (typeof identifier !== "string" && typeof identifier !== "number") {
+    throw new Error(`Actualización cancelada: ${fieldPath} tiene una imagen sin id`);
+  }
+  return identifier;
+}
+
+function prepareComponentForWrite(value: unknown, fieldPath: string): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item, index) => prepareComponentForWrite(item, `${fieldPath}[${index}]`));
+  }
+  if (!isJsonObject(value)) return value;
+
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => {
+    const childPath = fieldPath ? `${fieldPath}.${key}` : key;
+    if (key.toLowerCase() === "metaimage") {
+      return [key, mediaIdentifier(child, childPath)];
+    }
+    return [key, prepareComponentForWrite(child, childPath)];
+  }));
+}
+
+/**
+ * Builds a Strapi component update while preserving every sibling field.
+ * Populated MetaImage relations are converted from their read representation
+ * ({ data: { id, attributes } }) to the media id expected by Strapi on writes.
+ */
+export function safeComponentUpdatePayload(source: JsonObject, path: string, value: unknown): JsonObject {
+  const payload = strictTopLevelBranch(source, path, value);
+  const topKey = path.split(".")[0];
+  return { [topKey]: prepareComponentForWrite(payload[topKey], topKey) };
+}
+
