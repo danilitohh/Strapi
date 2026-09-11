@@ -1,10 +1,10 @@
 import { mkdir } from "node:fs/promises";
 import ExcelJS from "exceljs";
 import { loadConfig } from "./config.js";
-import { processProduct } from "./automation.js";
+import { synchronizeProducts } from "./sync.js";
 import { getAtPath } from "./object-path.js";
 import { StrapiClient } from "./strapi-client.js";
-import type { ProductResult } from "./types.js";
+import type { SyncResult } from "./types.js";
 
 const command = process.argv[2] ?? "run";
 const apply = process.argv.includes("--apply");
@@ -39,19 +39,9 @@ async function main(): Promise<void> {
   console.log(apply ? "MODO APLICAR: se escribirán cambios en Strapi." : "MODO SIMULACIÓN: no se escribirá nada en Strapi.");
   if (config.maxProducts) console.log(`LÍMITE ACTIVO: se procesarán como máximo ${config.maxProducts} productos.`);
 
-  const results: ProductResult[] = [];
-  for await (const product of client.allProducts()) {
-    if (config.maxProducts !== null && results.length >= config.maxProducts) break;
-    try {
-      const result = await processProduct(client, config, product, apply);
-      results.push(result);
-      const cleanup = result.removedInvalidCount ? `, inválidas a eliminar: ${result.removedInvalidCount}` : "";
-      console.log(`[${result.action}] ${result.slug}: +${result.added.length}${cleanup}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      results.push({ identifier: "desconocido", slug: "desconocido", existingCount: 0, added: [], unavailable: [], action: "error", error: message });
-      console.error(`[error] ${message}`);
-    }
+  const results: SyncResult[] = await synchronizeProducts(client, config, apply);
+  for (const result of results) {
+    console.log(`[${result.action}] ${result.locale}/${result.slug}: ${result.added.length} hreflang`);
   }
 
   await mkdir("reports", { recursive: true });
@@ -81,7 +71,6 @@ async function main(): Promise<void> {
       siuKey: result.siuKey ?? "",
       País: config.locale,
       "Cantidad de hreflang agregados": result.added.length,
-      "Entradas inválidas eliminadas": result.removedInvalidCount ?? 0,
       "Países agregados": countryList(result.added.map(item => item.hrefLang)),
       "Países no disponibles": countryList(result.unavailable.map(item => item.hreflang))
     }));
@@ -92,7 +81,6 @@ async function main(): Promise<void> {
     { header: "siuKey", key: "siuKey", width: 16 },
     { header: "País", key: "País", width: 14 },
     { header: "Cantidad de hreflang agregados", key: "Cantidad de hreflang agregados", width: 28 },
-    { header: "Entradas inválidas eliminadas", key: "Entradas inválidas eliminadas", width: 28 },
     { header: "Países agregados", key: "Países agregados", width: 58 },
     { header: "Países no disponibles", key: "Países no disponibles", width: 58 }
   ];

@@ -13,12 +13,12 @@ export class StrapiClient {
     return { Authorization: `Bearer ${this.config.token}`, "Content-Type": "application/json" };
   }
 
-  private listUrl(page: number): string {
+  private listUrl(locale: string, page: number): string {
     const query = new URLSearchParams({
       "pagination[page]": String(page),
       "pagination[pageSize]": String(this.config.pageSize),
       "pagination[withCount]": "true",
-      locale: this.config.locale,
+      locale,
       sort: "slug:asc"
     });
     const populate = this.config.populateQuery.replace(/^\?/, "");
@@ -34,15 +34,15 @@ export class StrapiClient {
     return response;
   }
 
-  async getPage(page: number): Promise<StrapiListResponse> {
-    return (await this.request(this.listUrl(page))).json() as Promise<StrapiListResponse>;
+  async getPage(page: number, locale = this.config.locale): Promise<StrapiListResponse> {
+    return (await this.request(this.listUrl(locale, page))).json() as Promise<StrapiListResponse>;
   }
 
-  async *allProducts(): AsyncGenerator<JsonObject> {
+  async *allProducts(locale = this.config.locale): AsyncGenerator<JsonObject> {
     let page = 1;
     let pageCount = 1;
     do {
-      const response = await this.getPage(page);
+      const response = await this.getPage(page, locale);
       if (!Array.isArray(response.data)) throw new Error("Strapi no devolvió un arreglo en data");
       for (const product of response.data) yield product;
       pageCount = response.meta?.pagination?.pageCount ?? (response.data.length === this.config.pageSize ? page + 1 : page);
@@ -51,9 +51,9 @@ export class StrapiClient {
     } while (page <= pageCount);
   }
 
-  async updateProduct(identifier: string | number, data: JsonObject): Promise<void> {
-    const locale = encodeURIComponent(this.config.locale);
-    const url = `${this.config.baseUrl}${this.config.productsPath}/${encodeURIComponent(String(identifier))}?locale=${locale}`;
+  async updateProduct(identifier: string | number, locale: string, data: JsonObject): Promise<void> {
+    const encodedLocale = encodeURIComponent(locale);
+    const url = `${this.config.baseUrl}${this.config.productsPath}/${encodeURIComponent(String(identifier))}?locale=${encodedLocale}`;
     await this.request(url, { method: "PUT", body: JSON.stringify({ data }) });
   }
 }

@@ -78,7 +78,7 @@ export async function processProduct(
 
   if (apply) {
     const payload = topLevelBranch(attributes, config.hrefLangsPath, [...existing, ...additions]);
-    await client.updateProduct(identifier, payload);
+    await client.updateProduct(identifier, config.locale, payload);
   }
 
   return {

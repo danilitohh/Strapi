@@ -26,3 +26,15 @@ export interface ProductResult {
   action: "skipped-complete" | "unchanged" | "would-update" | "updated" | "error";
   error?: string;
 }
+
+export interface SyncResult {
+  identifier: string | number;
+  locale: string;
+  slug: string;
+  productName: string;
+  siuKey: string;
+  added: HrefLang[];
+  unavailable: Array<{ hreflang: string; reason: string }>;
+  action: "updated" | "would-update" | "unchanged" | "error";
+  error?: string;
+}
