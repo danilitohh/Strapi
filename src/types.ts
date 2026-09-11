@@ -11,6 +11,7 @@ export interface CountryTarget {
   hreflang: string;
   countryPath: string | null;
   baseUrl: string;
+  slugRules?: Array<{ from: RegExp; to: string }>;
 }
 
 export interface ProductResult {
@@ -22,4 +23,3 @@ export interface ProductResult {
   action: "skipped-complete" | "unchanged" | "would-update" | "updated" | "error";
   error?: string;
 }
-

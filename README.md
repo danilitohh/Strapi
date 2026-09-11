@@ -49,7 +49,10 @@ npm run apply
 
 - 14 entradas máximas: 13 países más `x-default`.
 - Se revisan los códigos existentes para identificar exactamente cuáles faltan.
-- Se usa exclusivamente el `slug` del producto, sin transformarlo.
+- Se usa el `slug` del producto con estas excepciones lingüísticas por país:
+  - Chile: `maestria` se convierte en `magister`.
+  - Chile, Bolivia, Colombia, Ecuador, Paraguay y Perú: `licenciatura` se convierte en `carrera`.
+- Las sustituciones se realizan únicamente al inicio del slug; el resto permanece intacto.
 - México y `x-default` usan `https://utel.edu.mx/{slug}`.
 - Perú usa `https://utlenlinea.com/{slug}`.
 - Los demás usan `https://utel.edu.mx/{pais}/{slug}`.
