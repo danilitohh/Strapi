@@ -33,6 +33,7 @@ export interface SyncResult {
   slug: string;
   productName: string;
   siuKey: string;
+  hrefLangs: HrefLang[];
   added: HrefLang[];
   unavailable: Array<{ hreflang: string; reason: string }>;
   action: "updated" | "would-update" | "unchanged" | "error";

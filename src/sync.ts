@@ -119,6 +119,7 @@ export async function synchronizeProducts(client: StrapiClient, config: AppConfi
           slug: match.slug,
           productName: typeof productName === "string" ? productName : match.slug,
           siuKey: typeof siuKey === "string" || typeof siuKey === "number" ? String(siuKey) : "",
+          hrefLangs,
           added: changed ? hrefLangs : [],
           unavailable,
           action: changed ? (apply ? "updated" : "would-update") : "unchanged"
@@ -126,7 +127,7 @@ export async function synchronizeProducts(client: StrapiClient, config: AppConfi
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      results.push({ identifier: identifierOf(source.product), locale: source.locale, slug: source.slug, productName: source.slug, siuKey: "", added: [], unavailable: [], action: "error", error: message });
+      results.push({ identifier: identifierOf(source.product), locale: source.locale, slug: source.slug, productName: source.slug, siuKey: "", hrefLangs: [], added: [], unavailable: [], action: "error", error: message });
       console.error(`[error] ${source.slug}: ${message}`);
     }
   }
