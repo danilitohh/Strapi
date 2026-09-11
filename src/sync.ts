@@ -1,6 +1,6 @@
 import { buildUrl, createHrefLang, TARGETS } from "./countries.js";
 import type { AppConfig } from "./config.js";
-import { getAtPath, setAtPath } from "./object-path.js";
+import { getAtPath } from "./object-path.js";
 import { StrapiClient } from "./strapi-client.js";
 import type { HrefLang, JsonObject, SyncResult } from "./types.js";
 
@@ -110,8 +110,7 @@ export async function synchronizeProducts(client: StrapiClient, config: AppConfi
         const productName = getAtPath(attributes, "title");
         const siuKey = getAtPath(attributes, "siuKey");
         if (changed && apply) {
-          const onlyFieldPayload = setAtPath({}, config.hrefLangsPath, hrefLangs);
-          await client.updateProduct(identifier, match.locale, onlyFieldPayload);
+          await client.updateProductHrefLangs(identifier, match.locale, config.hrefLangsPath, hrefLangs);
         }
         results.push({
           identifier,

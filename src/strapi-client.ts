@@ -1,9 +1,21 @@
 import type { AppConfig } from "./config.js";
+import { strictTopLevelBranch } from "./object-path.js";
 import type { JsonObject } from "./types.js";
 
 interface StrapiListResponse {
   data: JsonObject[];
   meta?: { pagination?: { page?: number; pageCount?: number; total?: number } };
+}
+
+interface StrapiItemResponse {
+  data: JsonObject;
+}
+
+function attributesOf(product: JsonObject): JsonObject {
+  const attributes = product.attributes;
+  return attributes && typeof attributes === "object" && !Array.isArray(attributes)
+    ? attributes as JsonObject
+    : product;
 }
 
 export class StrapiClient {
@@ -51,9 +63,27 @@ export class StrapiClient {
     } while (page <= pageCount);
   }
 
-  async updateProduct(identifier: string | number, locale: string, data: JsonObject): Promise<void> {
+  private itemUrl(identifier: string | number, locale: string, populate: boolean): string {
     const encodedLocale = encodeURIComponent(locale);
-    const url = `${this.config.baseUrl}${this.config.productsPath}/${encodeURIComponent(String(identifier))}?locale=${encodedLocale}`;
+    const base = `${this.config.baseUrl}${this.config.productsPath}/${encodeURIComponent(String(identifier))}?locale=${encodedLocale}`;
+    const populateQuery = this.config.populateQuery.replace(/^\?/, "");
+    return populate && populateQuery ? `${base}&${populateQuery}` : base;
+  }
+
+  async updateProductHrefLangs(
+    identifier: string | number,
+    locale: string,
+    hrefLangsPath: string,
+    hrefLangs: unknown
+  ): Promise<void> {
+    const current = await this.request(this.itemUrl(identifier, locale, true));
+    const response = await current.json() as StrapiItemResponse;
+    if (!response.data || typeof response.data !== "object") {
+      throw new Error(`Actualización cancelada: Strapi no devolvió el producto ${identifier}`);
+    }
+
+    const data = strictTopLevelBranch(attributesOf(response.data), hrefLangsPath, hrefLangs);
+    const url = this.itemUrl(identifier, locale, false);
     await this.request(url, { method: "PUT", body: JSON.stringify({ data }) });
   }
 }

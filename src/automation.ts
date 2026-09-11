@@ -2,7 +2,7 @@ import pLimit from "p-limit";
 import { buildUrl, createHrefLang, MAX_HREFLANGS, TARGETS } from "./countries.js";
 import type { AppConfig } from "./config.js";
 import { isAvailable } from "./http.js";
-import { getAtPath, topLevelBranch } from "./object-path.js";
+import { getAtPath } from "./object-path.js";
 import { StrapiClient } from "./strapi-client.js";
 import type { HrefLang, JsonObject, ProductResult } from "./types.js";
 
@@ -77,8 +77,7 @@ export async function processProduct(
   }
 
   if (apply) {
-    const payload = topLevelBranch(attributes, config.hrefLangsPath, [...existing, ...additions]);
-    await client.updateProduct(identifier, config.locale, payload);
+    await client.updateProductHrefLangs(identifier, config.locale, config.hrefLangsPath, [...existing, ...additions]);
   }
 
   return {
