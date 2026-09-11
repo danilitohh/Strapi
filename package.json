@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
     "p-limit": "^6.2.0"
   },
   "devDependencies": {
@@ -20,4 +21,3 @@
     "typescript": "^5.7.3"
   }
 }
-

@@ -32,11 +32,17 @@ export async function processProduct(
   const slugValue = getAtPath(attributes, config.slugPath);
   if (typeof slugValue !== "string" || !slugValue.trim()) throw new Error(`Producto ${identifier} sin slug válido`);
   const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
+  const productName = getAtPath(attributes, "title");
+  const siuKey = getAtPath(attributes, "siuKey");
+  const reportInfo = {
+    productName: typeof productName === "string" ? productName : slug,
+    siuKey: typeof siuKey === "string" || typeof siuKey === "number" ? String(siuKey) : ""
+  };
   const currentValue = getAtPath(attributes, config.hrefLangsPath);
   const existing = Array.isArray(currentValue) ? currentValue as HrefLang[] : [];
 
   if (existing.length >= MAX_HREFLANGS) {
-    return { identifier, slug, existingCount: existing.length, added: [], unavailable: [], action: "skipped-complete" };
+    return { identifier, slug, ...reportInfo, existingCount: existing.length, added: [], unavailable: [], action: "skipped-complete" };
   }
 
   const existingCodes = new Set(existing.map(item => String(item.hreflang ?? "").toLowerCase()));
@@ -54,7 +60,7 @@ export async function processProduct(
   const unavailable = checks.filter(check => !check.available).map(({ target, url }) => ({ hreflang: target.hreflang, url }));
 
   if (additions.length === 0) {
-    return { identifier, slug, existingCount: existing.length, added: [], unavailable, action: "unchanged" };
+    return { identifier, slug, ...reportInfo, existingCount: existing.length, added: [], unavailable, action: "unchanged" };
   }
 
   if (apply) {
@@ -65,6 +71,7 @@ export async function processProduct(
   return {
     identifier,
     slug,
+    ...reportInfo,
     existingCount: existing.length,
     added: additions,
     unavailable,

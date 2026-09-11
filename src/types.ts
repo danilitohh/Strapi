@@ -17,6 +17,8 @@ export interface CountryTarget {
 export interface ProductResult {
   identifier: string | number;
   slug: string;
+  productName?: string;
+  siuKey?: string;
   existingCount: number;
   added: HrefLang[];
   unavailable: Array<{ hreflang: string; url: string }>;
