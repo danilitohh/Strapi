@@ -7,14 +7,9 @@ import { StrapiClient } from "./strapi-client.js";
 import type { HrefLang, JsonObject, ProductResult } from "./types.js";
 
 export function normalizeExistingHrefLangs(items: HrefLang[]): HrefLang[] {
-  const seen = new Set<string>();
-  return items.filter(item => {
-    if (typeof item.hrefLang !== "string" || !item.hrefLang.trim()) return false;
-    const code = item.hrefLang.trim().toLowerCase();
-    if (seen.has(code)) return false;
-    seen.add(code);
-    return true;
-  });
+  // Esta ruta auxiliar también debe conservar el contenido existente; nunca
+  // se elimina una entrada para corregirla automáticamente.
+  return [...items];
 }
 
 function attributesOf(product: JsonObject): JsonObject {
@@ -52,7 +47,22 @@ export async function processProduct(
   const currentValue = getAtPath(attributes, config.hrefLangsPath);
   const rawExisting = Array.isArray(currentValue) ? currentValue as HrefLang[] : [];
   const existing = normalizeExistingHrefLangs(rawExisting);
-  const removedInvalidCount = rawExisting.length - existing.length;
+  const removedInvalidCount = 0;
+  const invalidIndex = existing.findIndex(item => !item || typeof item !== "object" || typeof item.hrefLang !== "string" || !item.hrefLang.trim());
+
+  if (invalidIndex >= 0) {
+    return {
+      identifier,
+      slug,
+      ...reportInfo,
+      existingCount: existing.length,
+      removedInvalidCount,
+      added: [],
+      unavailable: [],
+      action: "error",
+      error: `Actualización cancelada: MultipleHrefLangs[${invalidIndex}] tiene hrefLang inválido y no se eliminará automáticamente`
+    };
+  }
 
   if (existing.length >= MAX_HREFLANGS && removedInvalidCount === 0) {
     return { identifier, slug, ...reportInfo, existingCount: existing.length, removedInvalidCount, added: [], unavailable: [], action: "skipped-complete" };

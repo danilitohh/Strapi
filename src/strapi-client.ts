@@ -30,6 +30,8 @@ export class StrapiClient {
       "pagination[page]": String(page),
       "pagination[pageSize]": String(this.config.pageSize),
       "pagination[withCount]": "true",
+      // Preview incluye productos publicados y productos que todavía están en Draft.
+      publicationState: "preview",
       locale,
       sort: "slug:asc"
     });
@@ -48,6 +50,23 @@ export class StrapiClient {
 
   async getPage(page: number, locale = this.config.locale): Promise<StrapiListResponse> {
     return (await this.request(this.listUrl(locale, page))).json() as Promise<StrapiListResponse>;
+  }
+
+  /**
+   * Busca un único producto por slug y locale, incluyendo Drafts para que un
+   * producto existente en Strapi no dependa de estar publicado en el sitio.
+   */
+  async findProductBySlug(slug: string, locale: string): Promise<JsonObject | undefined> {
+    const query = new URLSearchParams({
+      locale,
+      "filters[slug][$eq]": slug,
+      "pagination[page]": "1",
+      "pagination[pageSize]": "1",
+      publicationState: "preview"
+    });
+    const response = await this.request(`${this.config.baseUrl}${this.config.productsPath}?${query.toString()}`);
+    const body = await response.json() as StrapiListResponse;
+    return body.data[0];
   }
 
   async *allProducts(locale = this.config.locale): AsyncGenerator<JsonObject> {

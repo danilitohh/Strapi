@@ -3,7 +3,7 @@ import test from "node:test";
 import { normalizeExistingHrefLangs } from "../src/automation.js";
 import type { HrefLang } from "../src/types.js";
 
-test("elimina entradas con hrefLang nulo y códigos duplicados", () => {
+test("conserva entradas existentes aunque tengan hrefLang nulo o duplicado", () => {
   const items = [
     { id: 1, hrefLang: null, url: "https://utel.edu.mx/programa", locale: "", rel: "alternate" },
     { id: 2, hrefLang: "es-mx", url: "https://utel.edu.mx/programa", locale: null, rel: "alternate" },
@@ -11,5 +11,5 @@ test("elimina entradas con hrefLang nulo y códigos duplicados", () => {
     { id: 4, hrefLang: "x-default", url: "https://utel.edu.mx/programa", locale: null, rel: "alternate" }
   ] as unknown as HrefLang[];
 
-  assert.deepEqual(normalizeExistingHrefLangs(items).map(item => item.hrefLang), ["es-mx", "x-default"]);
+  assert.deepEqual(normalizeExistingHrefLangs(items), items);
 });
