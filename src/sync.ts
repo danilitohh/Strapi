@@ -101,18 +101,18 @@ function additionsOnly(existing: HrefLang[], desired: HrefLang[]): HrefLang[] {
     .slice(0, Math.max(0, MAX_HREFLANGS - existing.length));
 }
 
-/** Construye todos los enlaces válidos; x-default copia exactamente es-us. */
+/** Construye todos los enlaces válidos; x-default copia exactamente es-mx. */
 function desiredHrefLangs(matches: Map<string, ProductRecord>, unavailable: Unavailable[]): HrefLang[] {
   const result: HrefLang[] = [];
-  const usMatch = matches.get("es-us");
+  const mexicoMatch = matches.get("es-mx");
 
-  if (usMatch) {
-    const usTarget = TARGETS.find(target => target.hreflang === "es-us")!;
-    // Se reutiliza la misma URL calculada para es-us, sin reconstruir una URL distinta.
-    const usUrl = buildUrl(usTarget, usMatch.slug);
-    result.push(createHrefLang("x-default", usUrl));
+  if (mexicoMatch) {
+    const mexicoTarget = TARGETS.find(target => target.hreflang === "es-mx")!;
+    // Se reutiliza la misma URL calculada para es-mx, sin reconstruir una URL distinta.
+    const mexicoUrl = buildUrl(mexicoTarget, mexicoMatch.slug);
+    result.push(createHrefLang("x-default", mexicoUrl));
   } else {
-    unavailable.unshift({ hreflang: "x-default", reason: "No existe producto equivalente en es-us" });
+    unavailable.unshift({ hreflang: "x-default", reason: "No existe producto equivalente en es-mx" });
   }
 
   result.push(...Array.from(matches.entries()).map(([hreflang, match]) => {

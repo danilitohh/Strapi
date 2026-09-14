@@ -19,7 +19,7 @@ function product(id: number, slug: string, publishedAt: string | null): JsonObje
   };
 }
 
-test("incluye equivalentes en Draft y hace que x-default copie es-us", async () => {
+test("incluye equivalentes en Draft y hace que x-default copie es-mx", async () => {
   const productsByLocale = new Map<string, JsonObject[]>([
     ["es-US", [
       {
@@ -32,6 +32,7 @@ test("incluye equivalentes en Draft y hace que x-default copie es-us", async () 
         }
       }
     ]],
+    ["es-MX", [product(6, "doctorado-en-alta-direccion-y-gobierno-corporativo", "2026-09-11")]],
     ["es-EC", [product(2, "doctorado-en-alta-direccion-y-gobierno-corporativo", null)]],
     ["es-GT", [product(3, "doctorado-en-alta-direccion-y-gobierno-corporativo", null)]],
     ["es-SV", [product(4, "doctorado-en-alta-direccion-y-gobierno-corporativo", null)]]
@@ -73,9 +74,9 @@ test("incluye equivalentes en Draft y hace que x-default copie es-us", async () 
   assert.ok(lookupLocales.includes("es-SV"));
   const usResult = results.find(result => result.locale === "es-US");
   assert.ok(usResult);
-  const usUrl = usResult.hrefLangs.find(item => item.hrefLang === "es-us")?.url;
+  const mexicoUrl = usResult.hrefLangs.find(item => item.hrefLang === "es-mx")?.url;
   const defaultUrl = usResult.hrefLangs.find(item => item.hrefLang === "x-default")?.url;
-  assert.equal(defaultUrl, usUrl);
+  assert.equal(defaultUrl, mexicoUrl);
   assert.equal(updates.length, 1, "solo se actualiza el producto del locale configurado");
   const updatedHrefLangs = updates[0].body as Array<{ hrefLang: string; url: string }>;
   assert.ok(updatedHrefLangs.some(item => item.hrefLang === "es-ec"));
